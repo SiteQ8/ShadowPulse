@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>ShadowPulse — Linux Threat Hunting & Incident Response</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'><rect width='16' height='16' rx='3' fill='%2300d4ff'/><text x='8' y='12' text-anchor='middle' font-size='9' fill='%23050810' font-weight='bold'>SP</text></svg>">
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+:root{--bg:#050810;--bg2:#0a1018;--surface:#0e1624;--text:#c8d6e5;--text2:#7a8ea0;--text3:#3e5068;--cyan:#00d4ff;--red:#ff4757;--amber:#f0a500;--green:#2ed573;--border:#152035;--mono:'JetBrains Mono',monospace;--sans:'Inter',system-ui,sans-serif}
+body{font-family:var(--sans);background:var(--bg);color:var(--text);min-height:100vh}
+body::after{content:'';position:fixed;inset:0;background:repeating-linear-gradient(0deg,transparent,transparent 2px,rgba(0,212,255,0.006) 2px,rgba(0,212,255,0.006) 4px);pointer-events:none;z-index:9999}
+.container{max-width:1100px;margin:0 auto;padding:0 20px}
+.topbar{background:var(--bg2);border-bottom:1px solid var(--border);padding:10px 24px;display:flex;align-items:center;justify-content:space-between}
+.topbar-brand{font-family:var(--mono);font-size:0.92rem;font-weight:700;color:var(--cyan)}
+.topbar-brand span{color:var(--text3);font-weight:400;font-size:0.7rem;margin-left:6px}
+.topbar-links{display:flex;gap:16px;font-size:0.75rem}
+.topbar-links a{color:var(--text2);text-decoration:none}.topbar-links a:hover{color:var(--cyan)}
+.hero{padding:56px 0 40px;text-align:center;border-bottom:1px solid var(--border);position:relative}
+.hero::before{content:'';position:absolute;inset:0;background:radial-gradient(ellipse at 50% 0%,#00d4ff05 0%,transparent 55%);pointer-events:none}
+.hero h1{font-family:var(--mono);font-size:2.6rem;font-weight:700;color:var(--cyan);letter-spacing:-1.5px;margin-bottom:8px}
+.hero-sub{font-size:0.95rem;color:var(--text2);max-width:640px;margin:0 auto 12px;line-height:1.7}
+.hero-why{font-size:0.82rem;color:var(--text3);max-width:580px;margin:0 auto 24px;line-height:1.6}
+.hero-tags{display:flex;gap:5px;justify-content:center;flex-wrap:wrap;margin-bottom:24px}
+.htag{padding:4px 11px;border-radius:4px;font-family:var(--mono);font-size:0.64rem;font-weight:600;color:var(--cyan);border:1px solid #00d4ff22;background:#00d4ff06}
+.hero-actions{display:flex;gap:10px;justify-content:center}
+.btn{padding:10px 24px;border-radius:6px;font-family:var(--mono);font-size:0.82rem;font-weight:600;cursor:pointer;text-decoration:none;border:none;transition:all .12s}
+.btn-p{background:var(--cyan);color:#050810}.btn-p:hover{background:#40e0ff}
+.btn-s{background:transparent;border:1px solid var(--border);color:var(--text2)}.btn-s:hover{border-color:var(--cyan);color:var(--cyan)}
+.terminal{background:#020408;border:1px solid var(--border);border-radius:10px;overflow:hidden;max-width:760px;margin:40px auto;box-shadow:0 8px 40px rgba(0,0,0,0.5)}
+.term-bar{background:var(--bg2);padding:8px 14px;display:flex;align-items:center;gap:6px;border-bottom:1px solid var(--border)}
+.dot{width:10px;height:10px;border-radius:50%}
+.term-body{padding:16px;font-family:var(--mono);font-size:0.68rem;line-height:1.85;color:var(--text2);overflow-x:auto;white-space:pre}
+.tc{color:var(--cyan)}.tg{color:var(--green)}.tr{color:var(--red)}.tw{color:var(--amber)}.tb{color:var(--text);font-weight:600}
+.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;padding:40px 0 0}
+@media(max-width:640px){.stats{grid-template-columns:repeat(2,1fr)}}
+.stat{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:22px 16px;text-align:center}
+.stat-n{font-family:var(--mono);font-size:1.8rem;font-weight:700;color:var(--cyan)}
+.stat-l{font-size:0.68rem;color:var(--text3);margin-top:4px;text-transform:uppercase;letter-spacing:0.5px}
+.section{padding:44px 0;border-bottom:1px solid var(--border)}
+.section:last-of-type{border-bottom:none}
+.sec-l{font-family:var(--mono);font-size:0.66rem;font-weight:600;color:var(--cyan);text-transform:uppercase;letter-spacing:1.5px;margin-bottom:6px}
+.sec-t{font-size:1.2rem;font-weight:600;margin-bottom:6px}
+.sec-d{font-size:0.85rem;color:var(--text2);line-height:1.7;max-width:640px;margin-bottom:24px}
+.mod-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:10px}
+@media(max-width:700px){.mod-grid{grid-template-columns:1fr}}
+.mod{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:16px;display:flex;gap:12px;transition:border-color .12s}
+.mod:hover{border-color:var(--cyan)}
+.mod-n{width:38px;height:38px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-family:var(--mono);font-size:0.72rem;font-weight:700;flex-shrink:0;background:#00d4ff10;color:var(--cyan);border:1px solid #00d4ff20}
+.mod-c{flex:1}.mod-name{font-weight:600;font-size:0.86rem;margin-bottom:3px}
+.mod-desc{font-size:0.74rem;color:var(--text2);line-height:1.55}
+.mod-tech{font-family:var(--mono);font-size:0.6rem;color:var(--text3);margin-top:6px}
+.code{background:#020408;border:1px solid var(--border);border-radius:10px;padding:20px;font-family:var(--mono);font-size:0.74rem;color:var(--text2);line-height:1.9;overflow-x:auto}
+.code .c{color:var(--text3)}.code .k{color:var(--cyan)}
+.arch{font-family:var(--mono);font-size:0.7rem;line-height:1.7;color:var(--text2);background:#020408;border:1px solid var(--border);border-radius:10px;padding:20px;overflow-x:auto;white-space:pre}
+.arch .h{color:var(--cyan);font-weight:700}.arch .s{color:var(--text3)}
+.footer{text-align:center;padding:36px 16px;font-size:0.68rem;color:var(--text3);border-top:1px solid var(--border);font-family:var(--mono)}
+.footer a{color:var(--cyan);text-decoration:none}
+</style>
+</head>
+<body>
+<div class="topbar"><div class="topbar-brand">ShadowPulse <span>v1.0</span></div><div class="topbar-links"><a href="https://github.com/SiteQ8/ShadowPulse">Source</a><a href="https://github.com/SiteQ8/ShadowPulse/issues">Issues</a><a href="https://github.com/SiteQ8/ShadowPulse/discussions">Discuss</a></div></div>
+<div class="container">
+<div class="hero">
+    <h1>ShadowPulse</h1>
+    <div class="hero-sub">Linux Threat Hunting and Incident Response Toolkit. Automated evidence collection, malware detection, persistence hunting, IOC extraction, and forensic reporting.</div>
+    <div class="hero-why">When a breach happens, the first 30 minutes determine everything. ShadowPulse gives incident responders a production-ready toolkit that deploys in seconds and covers the entire forensic lifecycle — from volatile data capture to chain-of-custody reporting.</div>
+    <div class="hero-tags">
+        <span class="htag">Evidence Collection</span><span class="htag">Malware Detection</span><span class="htag">Persistence Hunting</span>
+        <span class="htag">IOC Extraction</span><span class="htag">Webshell Scanner</span><span class="htag">Rootkit Checks</span>
+        <span class="htag">Timeline Reconstruction</span><span class="htag">Chain of Custody</span><span class="htag">HTML Reports</span>
+    </div>
+    <div class="hero-actions">
+        <a class="btn btn-p" href="https://github.com/SiteQ8/ShadowPulse">View Repository</a>
+        <a class="btn btn-s" href="https://raw.githubusercontent.com/SiteQ8/ShadowPulse/main/shadowpulse.sh">Download Script</a>
+    </div>
+</div>
+
+<div class="terminal">
+    <div class="term-bar"><div class="dot" style="background:#ff5f57"></div><div class="dot" style="background:#febc2e"></div><div class="dot" style="background:#28c840"></div><span style="font-family:var(--mono);font-size:0.64rem;color:var(--text3);margin-left:8px">root@incident:~#</span></div>
+    <div class="term-body"><span class="tc">$</span> <span class="tb">sudo ./shadowpulse.sh</span>
+
+<span class="tc">   _____ __              __                ____        __</span>
+<span class="tc">  / ___// /_  ____ _____/ /___ _      __  / __ \__  __/ /_____ ___</span>
+<span class="tc">  \__ \/ __ \/ __  / __  / __ \ | /| / / / /_/ / / / / / ___/ _ \</span>
+<span class="tc"> ___/ / / / / /_/ / /_/ / /_/ / |/ |/ / / ____/ /_/ / (__  )  __/</span>
+<span class="tc">/____/_/ /_/\__,_/\__,_/\____/|__/|__/ /_/    \__,_/_/____/\___/</span>
+
+  <span class="tc">[INFO]</span>  Case directory: /var/shadowpulse/case-20260309-143022
+  <span class="tg">[PASS]</span>  System: web-prod-01 (5.15.0-92-generic)
+
+<span class="tb">═══ MODULE 1: VOLATILE DATA COLLECTION ═══</span>
+  <span class="tb">[DATA]</span>  Process tree captured (247 processes)
+  <span class="tr">[ALERT]</span> <span class="tr">[HIGH] Deleted files still open — 3 deleted files held open</span>
+  <span class="tg">[PASS]</span>  Volatile data collection complete
+
+<span class="tb">═══ MODULE 2: PERSISTENCE MECHANISM HUNTING ═══</span>
+  <span class="tr">[ALERT]</span> <span class="tr">[CRITICAL] Suspicious cron job — contains curl|bash indicators</span>
+  <span class="tr">[ALERT]</span> <span class="tr">[CRITICAL] Backdoor in shell profile — .bashrc injection</span>
+  <span class="tb">[DATA]</span>  SSH authorized_keys: 4 keys found
+
+<span class="tb">═══ MODULE 3: MALWARE & WEBSHELL DETECTION ═══</span>
+  <span class="tr">[ALERT]</span> <span class="tr">[CRITICAL] Potential webshells detected — 2 files match signatures</span>
+  <span class="tr">[ALERT]</span> <span class="tr">[HIGH] Recently modified system binaries — 3 binaries changed</span>
+  <span class="tg">[PASS]</span>  No crypto miners detected
+
+<span class="tb">═══ MODULE 7: IOC EXTRACTION ═══</span>
+  <span class="tb">[DATA]</span>  External IPs (active connections): 12
+  <span class="tr">[ALERT]</span> <span class="tr">[HIGH] Suspicious commands in shell history — 7 patterns found</span>
+
+<span class="tb">════════════════════════════════════════════════════════════</span>
+  ShadowPulse Investigation Complete
+  Hostname:      web-prod-01
+  Modules:       8
+  Findings:      14
+    Critical:    <span class="tr">3</span>
+    High:        <span class="tr">5</span>
+    Medium:      <span class="tw">4</span>
+    Low:         <span class="tg">2</span>
+  Evidence:      /var/shadowpulse/case-20260309-143022/evidence/
+  Report:        /var/shadowpulse/case-20260309-143022/report.html
+<span class="tb">════════════════════════════════════════════════════════════</span></div>
+</div>
+
+<div class="stats">
+    <div class="stat"><div class="stat-n">8</div><div class="stat-l">Forensic Modules</div></div>
+    <div class="stat"><div class="stat-n">50+</div><div class="stat-l">Evidence Artifacts</div></div>
+    <div class="stat"><div class="stat-n">30+</div><div class="stat-l">Detection Signatures</div></div>
+    <div class="stat"><div class="stat-n">0</div><div class="stat-l">Dependencies</div></div>
+</div>
+
+<div class="section">
+    <div class="sec-l">Forensic Modules</div>
+    <div class="sec-t">8 modules covering the entire incident response lifecycle</div>
+    <div class="sec-d">Each module collects evidence, detects anomalies, and generates findings with severity classification and remediation guidance. All evidence is SHA-256 hashed for chain-of-custody preservation.</div>
+    <div class="mod-grid">
+        <div class="mod"><div class="mod-n">01</div><div class="mod-c"><div class="mod-name">Volatile Data Collection</div><div class="mod-desc">Process trees, open file descriptors, deleted-but-open files, kernel modules, memory maps, mount points, environment variables with secret detection.</div><div class="mod-tech">ps auxwwf | lsof | /proc/maps | lsmod | mount</div></div></div>
+        <div class="mod"><div class="mod-n">02</div><div class="mod-c"><div class="mod-name">Persistence Hunting</div><div class="mod-desc">Cron jobs (system + user), systemd services and timers, init scripts, rc.local, shell profiles (.bashrc, .profile), SSH authorized_keys, LD_PRELOAD, at jobs.</div><div class="mod-tech">crontab | systemctl | /etc/init.d | .bashrc | authorized_keys</div></div></div>
+        <div class="mod"><div class="mod-n">03</div><div class="mod-c"><div class="mod-name">Malware and Webshell Detection</div><div class="mod-desc">Hidden files in /tmp and /dev/shm, SUID binary audit, webshell signature scanning (14 patterns), crypto miner detection, reverse shell detection, rootkit checks, package integrity verification.</div><div class="mod-tech">find | grep signatures | rpm -Va | dpkg --verify</div></div></div>
+        <div class="mod"><div class="mod-n">04</div><div class="mod-c"><div class="mod-name">User and Authentication Analysis</div><div class="mod-desc">UID 0 account audit, passwordless accounts, sudoers NOPASSWD review, login history (success + failed), SSH activity analysis, recently created users.</div><div class="mod-tech">/etc/passwd | /etc/shadow | sudoers | last | lastb</div></div></div>
+        <div class="mod"><div class="mod-n">05</div><div class="mod-c"><div class="mod-name">Network Forensics</div><div class="mod-desc">Active connections with process mapping, suspicious C2 port detection (4444, 5555, 1337), DNS configuration audit, ARP table, routing, firewall rules, promiscuous mode detection.</div><div class="mod-tech">ss -tulnap | ip neigh | iptables | nftables | ip link</div></div></div>
+        <div class="mod"><div class="mod-n">06</div><div class="mod-c"><div class="mod-name">Log Analysis</div><div class="mod-desc">Collection of auth, syslog, kernel, web server logs. Log tampering detection (empty/truncated files). Brute force indicators, privilege escalation attempts, audit log analysis.</div><div class="mod-tech">/var/log/* | ausearch | grep patterns</div></div></div>
+        <div class="mod"><div class="mod-n">07</div><div class="mod-c"><div class="mod-name">IOC Extraction</div><div class="mod-desc">External IP addresses (connections + logs), domain extraction, URL harvesting, file hashes (SHA-256) of suspicious binaries, shell history analysis for attack commands.</div><div class="mod-tech">ss | grep -oE | sha256sum | history analysis</div></div></div>
+        <div class="mod"><div class="mod-n">08</div><div class="mod-c"><div class="mod-name">Timeline Reconstruction</div><div class="mod-desc">File modification timeline (72 hours), authentication event timeline, package installation history, login session timeline. Sorted chronologically for investigation.</div><div class="mod-tech">find -printf '%T+' | last | dpkg.log | rpm --last</div></div></div>
+    </div>
+</div>
+
+<div class="section">
+    <div class="sec-l">Deployment</div>
+    <div class="sec-t">Deploys in seconds. No dependencies. No installation.</div>
+    <div class="code"><span class="c"># Deploy to a compromised system</span>
+<span class="k">curl -sO https://raw.githubusercontent.com/SiteQ8/ShadowPulse/main/shadowpulse.sh</span>
+<span class="k">chmod +x shadowpulse.sh</span>
+<span class="k">sudo ./shadowpulse.sh</span>
+
+<span class="c"># Run specific modules only</span>
+<span class="k">sudo ./shadowpulse.sh --volatile --malware --network</span>
+
+<span class="c"># Hunt for persistence and lateral movement</span>
+<span class="k">sudo ./shadowpulse.sh --persistence --users --logs</span>
+
+<span class="c"># Extract IOCs for threat intel sharing</span>
+<span class="k">sudo ./shadowpulse.sh --ioc --timeline</span>
+
+<span class="c"># Custom output directory for case management</span>
+<span class="k">sudo ./shadowpulse.sh --output /cases/INC-2026-042</span></div>
+</div>
+
+<div class="section">
+    <div class="sec-l">Output</div>
+    <div class="sec-t">Forensic evidence package with chain of custody</div>
+    <div class="arch"><span class="h">/var/shadowpulse/case-20260309-143022/</span>
+<span class="s">├──</span> <span class="h">evidence/</span>                    <span class="s">Raw collected artifacts</span>
+<span class="s">│   ├──</span> processes-tree.txt         Process hierarchy snapshot
+<span class="s">│   ├──</span> open-files.txt             File descriptor listing
+<span class="s">│   ├──</span> deleted-files-open.txt     Deleted but open files
+<span class="s">│   ├──</span> kernel-modules.txt         Loaded kernel modules
+<span class="s">│   ├──</span> cron-system.txt            System cron jobs
+<span class="s">│   ├──</span> cron-users.txt             Per-user cron jobs
+<span class="s">│   ├──</span> systemd-services.txt       All systemd units
+<span class="s">│   ├──</span> ssh-authorized-keys.txt    SSH public keys
+<span class="s">│   ├──</span> webshells-*.txt            Detected webshell files
+<span class="s">│   ├──</span> suid-binaries.txt          SUID/SGID audit
+<span class="s">│   ├──</span> netstat-established.txt    Active connections
+<span class="s">│   ├──</span> ioc-ips.txt                External IP addresses
+<span class="s">│   ├──</span> ioc-hashes.txt             SHA-256 file hashes
+<span class="s">│   ├──</span> ioc-history.txt            Suspicious commands
+<span class="s">│   ├──</span> timeline-files.txt         File modification timeline
+<span class="s">│   └──</span> ... <span class="s">(50+ evidence files)</span>
+<span class="s">├──</span> <span class="h">chain-of-custody.sha256</span>      <span class="s">SHA-256 hashes of ALL evidence</span>
+<span class="s">└──</span> <span class="h">report.html</span>                  <span class="s">Visual forensic report</span></div>
+</div>
+</div>
+<div class="footer">ShadowPulse v1.0 — Linux Threat Hunting &amp; Incident Response<br>Made in Kuwait — MIT License | <a href="https://github.com/SiteQ8/ShadowPulse">GitHub</a> | <a href="https://github.com/SiteQ8">@SiteQ8</a> — Ali AlEnezi</div>
+</body>
+</html>
