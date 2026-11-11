@@ -22,28 +22,28 @@ When a breach happens, the first 30 minutes determine everything.
 
 ## Overview
 
-ShadowPulse automates the forensic investigation lifecycle on Linux systems. It collects volatile evidence, hunts for persistence mechanisms, detects malware and webshells, extracts IOCs, reconstructs event timelines, and generates chain-of-custody reports — all in a single execution.
+ShadowPulse automates the forensic investigation lifecycle on Linux systems. It collects volatile evidence, hunts for persistence mechanisms, detects malware and webshells, extracts IOCs, reconstructs event timelines, and generates chain-of-custody reports, all in a single execution.
 
 ### What It Does
 
-- **Collects volatile evidence** before it disappears — processes, connections, memory maps, open files
-- **Hunts persistence** — cron, systemd, shell profiles, SSH keys, LD_PRELOAD, init scripts
-- **Detects malware** — webshell signatures (14 patterns), crypto miners, reverse shells, rootkit indicators
-- **Audits users** — UID 0 accounts, passwordless users, NOPASSWD sudo, failed logins, SSH activity
-- **Analyzes networks** — active connections, C2 port detection, DNS, ARP, firewall, promiscuous mode
-- **Inspects logs** — brute force indicators, privilege escalation, log tampering detection
-- **Extracts IOCs** — external IPs, domains, URLs, file hashes, suspicious command history
-- **Builds timelines** — file modifications, auth events, package installations, login sessions
-- **Preserves evidence** — SHA-256 hashing of every artifact for chain-of-custody integrity
+- **Collects volatile evidence** before it disappears: processes, connections, memory maps, open files
+- **Hunts persistence**: cron, systemd, shell profiles, SSH keys, LD_PRELOAD, init scripts
+- **Detects malware**: webshell signatures (14 patterns), crypto miners, reverse shells, rootkit indicators
+- **Audits users**: UID 0 accounts, passwordless users, NOPASSWD sudo, failed logins, SSH activity
+- **Analyzes networks**: active connections, C2 port detection, DNS, ARP, firewall, promiscuous mode
+- **Inspects logs**: brute force indicators, privilege escalation, log tampering detection
+- **Extracts IOCs**: external IPs, domains, URLs, file hashes, suspicious command history
+- **Builds timelines**: file modifications, auth events, package installations, login sessions
+- **Preserves evidence**: SHA-256 hashing of every artifact for chain-of-custody integrity
 
 ### Design Principles
 
-- **Zero dependencies** — Pure Bash. No Python, Ruby, Go, or external tools to install.
-- **Forensically sound** — SHA-256 chain of custody for every evidence file collected.
-- **Modular execution** — Run all 8 modules or select only what you need.
-- **Non-destructive** — Read-only evidence collection. No system modifications.
-- **On-premises** — Runs entirely on the target system. No data exfiltration.
-- **Immediate deployment** — Download and execute. No compilation or configuration.
+- **Zero dependencies**: Pure Bash. No Python, Ruby, Go, or external tools to install.
+- **Forensically sound**: SHA-256 chain of custody for every evidence file collected.
+- **Modular execution**: Run all 8 modules or select only what you need.
+- **Non-destructive**: Read-only evidence collection. No system modifications.
+- **On-premises**: Runs entirely on the target system. No data exfiltration.
+- **Immediate deployment**: Download and execute. No compilation or configuration.
 
 ---
 
@@ -152,7 +152,7 @@ Every investigation produces a forensic evidence package:
 
 ### Chain of Custody
 
-Every evidence file is SHA-256 hashed immediately after collection. The `chain-of-custody.sha256` file provides cryptographic proof that evidence has not been modified after collection — essential for legal proceedings and compliance audits.
+Every evidence file is SHA-256 hashed immediately after collection. The `chain-of-custody.sha256` file provides cryptographic proof that evidence has not been modified after collection, essential for legal proceedings and compliance audits.
 
 ### HTML Report
 
@@ -219,11 +219,11 @@ See [CONTRIBUTING.md](CONTRIBUTING.md).
 
 ## License
 
-MIT License — see [LICENSE](LICENSE).
+MIT License, see [LICENSE](LICENSE).
 
 ---
 
 <div align="center">
-  <sub>ShadowPulse — Linux Threat Hunting and Incident Response Toolkit</sub><br>
-  <sub><a href="https://github.com/SiteQ8">@SiteQ8</a> — Ali AlEnezi — Made in Kuwait</sub>
+  <sub>ShadowPulse, Linux Threat Hunting and Incident Response Toolkit</sub><br>
+  <sub><a href="https://github.com/SiteQ8">@SiteQ8</a>, Ali AlEnezi, Made in Kuwait</sub>
 </div>
