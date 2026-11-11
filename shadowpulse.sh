@@ -1,11 +1,11 @@
 #!/usr/bin/env bash
 ###############################################################################
-# ShadowPulse — Linux Threat Hunting & Incident Response Toolkit
+# ShadowPulse: Linux Threat Hunting & Incident Response Toolkit
 #
 # Automated evidence collection, malware detection, persistence hunting,
 # IOC extraction, and forensic reporting for Linux incident response.
 #
-# Author:  Ali AlEnezi (@SiteQ8) — Made in Kuwait
+# Author:  Ali AlEnezi (@SiteQ8) - Made in Kuwait
 # License: MIT
 # Version: 1.0.0
 ###############################################################################
@@ -106,7 +106,7 @@ Options:
   --version          Show version
 
 Examples:
-  sudo shadowpulse.sh                          # Full scan — all modules
+  sudo shadowpulse.sh                          # Full scan: all modules
   sudo shadowpulse.sh --volatile --network     # Only volatile + network
   sudo shadowpulse.sh --malware --persistence  # Hunt for threats
   sudo shadowpulse.sh --output /cases/inc-42   # Custom output path
@@ -178,12 +178,12 @@ save_evidence "system-info.txt" "echo 'Hostname: ${HOSTNAME}'; echo 'Kernel: $(u
 if $RUN_VOLATILE; then
 section "MODULE 1: VOLATILE DATA COLLECTION"
 
-# Running processes — full tree
+# Running processes: full tree
 save_evidence "processes-tree.txt" "ps auxwwf"
 save_evidence "processes-full.txt" "ps -eo pid,ppid,user,uid,gid,stat,ni,vsz,rss,%cpu,%mem,wchan,tty,start,time,comm,args --sort=-%cpu"
 log_data "Process tree captured ($(ps aux | wc -l) processes)"
 
-# Process ancestry — detect orphan/reparented processes
+# Process ancestry: detect orphan/reparented processes
 save_evidence "process-parents.txt" "ps -eo pid,ppid,comm,args --sort=ppid"
 orphans=$(ps -eo ppid | grep -c "^\s*1$" 2>/dev/null || echo "0")
 if [[ "$orphans" -gt 20 ]]; then
@@ -231,7 +231,7 @@ fi
 if $RUN_PERSISTENCE; then
 section "MODULE 2: PERSISTENCE MECHANISM HUNTING"
 
-# Cron jobs — all users
+# Cron jobs: all users
 save_evidence "cron-system.txt" "cat /etc/crontab 2>/dev/null; ls -la /etc/cron.*/ 2>/dev/null; cat /etc/cron.d/* 2>/dev/null"
 save_evidence "cron-users.txt" "for user in \$(cut -f1 -d: /etc/passwd); do echo \"=== \$user ===\"; crontab -l -u \$user 2>/dev/null || echo 'none'; done"
 
@@ -356,7 +356,7 @@ if ps aux | grep -iE 'bash.*-i.*>.*&|/dev/tcp|nc.*-e|ncat.*-e' 2>/dev/null | gre
     add_finding "CRITICAL" "Potential reverse shell detected" "Active process matches reverse shell patterns" "Investigate and terminate suspected reverse shell immediately"
 fi
 
-# Rootkit detection — basic checks
+# Rootkit detection: basic checks
 save_evidence "rootkit-checks.txt" "
 echo '=== /proc hidden process check ===';
 for pid in /proc/[0-9]*/; do
